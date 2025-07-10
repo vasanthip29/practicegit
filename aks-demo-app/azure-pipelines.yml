@@ -23,10 +23,10 @@ stages:
           - task: Docker@2
             displayName: Build and Push
             inputs:
-              containerRegistry: 'MyACRConnection'   # ✅ Replace with your ACR Service Connection name
+              containerRegistry: 'MyACRConnection'
               repository: '$(IMAGE_NAME)'
               command: 'buildAndPush'
-              Dockerfile: 'aks-demo-app/Dockerfile'   # ✅ Correct path to your Dockerfile
+              Dockerfile: 'Dockerfile'   # ✅ Correct path now!
               tags: |
                 $(TAG)
 
@@ -34,5 +34,33 @@ stages:
     displayName: Deploy to AKS
     dependsOn: BuildAndPush
     jobs:
-      - job: kub
+      - job: kubectlApply
+        displayName: Deploy manifests
+        pool:
+          vmImage: ubuntu-latest
+
+        steps:
+          - checkout: self
+
+          - task: AzureCLI@2
+            displayName: Set AKS Context
+            inputs:
+              azureSubscription: 'MyAzureConnection'
+              scriptType: bash
+              scriptLocation: inlineScript
+              inlineScript: |
+                az aks get-credentials --resource-group $(AKS_RESOURCE_GROUP) --name $(AKS_CLUSTER_NAME)
+
+          - task: KubernetesManifest@1
+            displayName: Deploy to AKS
+            inputs:
+              action: deploy
+              kubernetesServiceConnection: 'MyAKSConnection'
+              namespace: default
+              manifests: |
+                manifests/deployment.yaml
+                manifests/service.yaml
+              containers: |
+                myaksacr12080.azurecr.io/$(IMAGE_NAME):$(TAG)
+
 
