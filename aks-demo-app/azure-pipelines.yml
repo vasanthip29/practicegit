@@ -2,7 +2,6 @@ trigger:
   - main
 
 variables:
-  ACR_NAME: myaksacr12080
   IMAGE_NAME: aks-demo-app
   TAG: $(Build.BuildId)
 
@@ -24,7 +23,7 @@ stages:
           - task: Docker@2
             displayName: Build and Push
             inputs:
-              containerRegistry: '$(ACR_NAME).azurecr.io'
+              containerRegistry: 'MyACRConnection'   # ✅ ACR Service Connection name
               repository: '$(IMAGE_NAME)'
               command: 'buildAndPush'
               Dockerfile: '**/Dockerfile'
@@ -46,7 +45,7 @@ stages:
           - task: AzureCLI@2
             displayName: Set AKS Context
             inputs:
-              azureSubscription: 'MyAzureConnection'
+              azureSubscription: 'MyAzureConnection'   # ✅ Azure Resource Manager connection
               scriptType: bash
               scriptLocation: inlineScript
               inlineScript: |
@@ -56,10 +55,11 @@ stages:
             displayName: Deploy to AKS
             inputs:
               action: deploy
-              kubernetesServiceConnection: 'MyAzureConnection'
+              kubernetesServiceConnection: 'MyAKSConnection'   # ✅ Kubernetes Service Connection name
               namespace: default
               manifests: |
                 manifests/deployment.yaml
                 manifests/service.yaml
               containers: |
-                $(ACR_NAME).azurecr.io/$(IMAGE_NAME):$(TAG)
+                $(containerRegistry)/$(IMAGE_NAME):$(TAG)
+
