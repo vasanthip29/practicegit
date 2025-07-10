@@ -23,7 +23,7 @@ stages:
           - task: Docker@2
             displayName: Build and Push
             inputs:
-              containerRegistry: 'MyACRConnection'   # ✅ ACR Service Connection name
+              containerRegistry: 'MyACRConnection'   # ✅ Your ACR Service Connection name
               repository: '$(IMAGE_NAME)'
               command: 'buildAndPush'
               Dockerfile: '**/Dockerfile'
@@ -45,7 +45,7 @@ stages:
           - task: AzureCLI@2
             displayName: Set AKS Context
             inputs:
-              azureSubscription: 'MyAzureConnection'   # ✅ Azure Resource Manager connection
+              azureSubscription: 'MyAzureConnection'   # ✅ Your Azure Resource Manager connection
               scriptType: bash
               scriptLocation: inlineScript
               inlineScript: |
@@ -55,11 +55,12 @@ stages:
             displayName: Deploy to AKS
             inputs:
               action: deploy
-              kubernetesServiceConnection: 'MyAKSConnection'   # ✅ Kubernetes Service Connection name
+              kubernetesServiceConnection: 'MyAKSConnection'   # ✅ Your Kubernetes Service Connection name
               namespace: default
               manifests: |
                 manifests/deployment.yaml
                 manifests/service.yaml
               containers: |
-                $(containerRegistry)/$(IMAGE_NAME):$(TAG)
+                myaksacr12080.azurecr.io/$(IMAGE_NAME):$(TAG)   # ✅ Use your ACR login server here!
+
 
