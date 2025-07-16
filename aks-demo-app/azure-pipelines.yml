@@ -3,7 +3,7 @@ trigger:
 
 variables:
   IMAGE_NAME: aks-demo-app
-  TAG: $(Build.BuildId)
+  TAG: latest
 
   AKS_CLUSTER_NAME: aksDemoCluster
   AKS_RESOURCE_GROUP: demorg
@@ -31,37 +31,37 @@ stages:
               tags: |
                 $(TAG)
 
-  - stage: DeployToAKS
-    displayName: Deploy to AKS
-    dependsOn: BuildAndPush
-    jobs:
-      - job: kubectlApply
-        displayName: Deploy manifests
-        pool:
-          vmImage: ubuntu-latest
+  # - stage: DeployToAKS
+  #   displayName: Deploy to AKS
+  #   dependsOn: BuildAndPush
+  #   jobs:
+  #     - job: kubectlApply
+  #       displayName: Deploy manifests
+  #       pool:
+  #         vmImage: ubuntu-latest
 
-        steps:
-          - checkout: self
+  #       steps:
+  #         - checkout: self
 
-          - task: AzureCLI@2
-            displayName: Set AKS Context
-            inputs:
-              azureSubscription: 'MyAzureConnection'
-              scriptType: bash
-              scriptLocation: inlineScript
-              inlineScript: |
-                az aks get-credentials --resource-group $(AKS_RESOURCE_GROUP) --name $(AKS_CLUSTER_NAME)
+  #         - task: AzureCLI@2
+  #           displayName: Set AKS Context
+  #           inputs:
+  #             azureSubscription: 'MyAzureConnection'
+  #             scriptType: bash
+  #             scriptLocation: inlineScript
+  #             inlineScript: |
+  #               az aks get-credentials --resource-group $(AKS_RESOURCE_GROUP) --name $(AKS_CLUSTER_NAME)
 
-          - task: KubernetesManifest@1
-            displayName: Deploy to AKS
-            inputs:
-              action: deploy
-              kubernetesServiceConnection: 'MyAKSConnection'
-              namespace: default
-              manifests: |
-                manifests/deployment.yaml
-                manifests/service.yaml
-              containers: |
-                myaksacr12080.azurecr.io/$(IMAGE_NAME):$(TAG)
+  #         - task: KubernetesManifest@1
+  #           displayName: Deploy to AKS
+  #           inputs:
+  #             action: deploy
+  #             kubernetesServiceConnection: 'MyAKSConnection'
+  #             namespace: default
+  #             manifests: |
+  #               manifests/deployment.yaml
+  #               manifests/service.yaml
+  #             containers: |
+  #               myaksacr12080.azurecr.io/$(IMAGE_NAME):$(TAG)
 
 
