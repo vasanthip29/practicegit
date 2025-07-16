@@ -26,7 +26,7 @@ stages:
               containerRegistry: 'MyACRConnection'
               repository: '$(IMAGE_NAME)'
               command: 'buildAndPush'
-              Dockerfile: 'aks-demo-app/Dockerfile'
+              Dockerfile: '**/Dockerfile'
               buildContext: 'aks-demo-app'
               tags: |
                 $(TAG)
